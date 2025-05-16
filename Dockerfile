@@ -1,28 +1,22 @@
-# 1️⃣ Стадия сборки
+# 1️⃣ Stage: Build using musl
 FROM rust:latest as builder
 
+RUN rustup target add x86_64-unknown-linux-musl
 
-# Устанавливаем рабочую директорию
 WORKDIR /app
 
-# Кэшируем зависимости
 COPY Cargo.toml Cargo.lock ./
 COPY src ./src
 
-# Прогреваем зависимостями
-RUN cargo build --release
+RUN cargo build --release --target x86_64-unknown-linux-musl
 
-# 2️⃣ Финальный образ
-FROM debian:buster-slim
+# 2️⃣ Stage: Run in minimal container
+FROM alpine:latest
 
-# Устанавливаем минимумы
-RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache ca-certificates
 
-# Копируем бинарник из билд-стадии
-COPY --from=builder /app/target/release/server /usr/local/bin/server
+COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/server /usr/local/bin/server
 
-# Сетап порта
 EXPOSE 3001
 
-# Запускаем сервер
 CMD ["server"]
