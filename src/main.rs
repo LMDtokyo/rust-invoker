@@ -1,7 +1,7 @@
 use axum::{routing::{get, post}, Router};
 use std::net::SocketAddr;
 use tower_http::cors::{CorsLayer, Any};
-use tower::ServiceBuilder;
+use tower::ServiceBuilder; 
 
 mod routes;
 mod logic;
@@ -23,7 +23,6 @@ async fn main() {
         spell: SpellState::default(),
     };
 
-    // CORS middleware
     let cors = CorsLayer::new()
         .allow_origin(Any)
         .allow_methods(Any)
@@ -36,12 +35,9 @@ async fn main() {
         .route("/hero/active", get(get_selected_hero))
         .merge(spell_routes())
         .with_state(app_state)
-        .layer(
-            ServiceBuilder::new()
-                .layer(cors) 
-        );
+        .layer(ServiceBuilder::new().layer(cors)); 
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], 3001));
+    let addr = SocketAddr::from(([0, 0, 0, 0], 3001)); 
     println!("🦀 Server running at http://{}", addr);
 
     axum_server::bind(addr)
