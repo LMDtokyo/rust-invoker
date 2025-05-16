@@ -1,5 +1,6 @@
 # 1️⃣ Стадия сборки
-FROM rust:1.77 as builder
+FROM rust:latest as builder
+
 
 # Устанавливаем рабочую директорию
 WORKDIR /app
