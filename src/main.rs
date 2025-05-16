@@ -1,7 +1,7 @@
-// === main.rs ===
 use axum::{routing::{get, post}, Router};
 use std::net::SocketAddr;
 use tower_http::cors::{CorsLayer, Any};
+use tower::ServiceBuilder;
 
 mod routes;
 mod logic;
@@ -23,6 +23,12 @@ async fn main() {
         spell: SpellState::default(),
     };
 
+    // CORS middleware
+    let cors = CorsLayer::new()
+        .allow_origin(Any)
+        .allow_methods(Any)
+        .allow_headers(Any);
+
     let app = Router::new()
         .route("/greeting", get(get_greeting))
         .route("/rune", get(fetch_rune))
@@ -31,10 +37,8 @@ async fn main() {
         .merge(spell_routes())
         .with_state(app_state)
         .layer(
-            CorsLayer::new()
-                .allow_origin(Any)
-                .allow_methods(Any)
-                .allow_headers(Any),
+            ServiceBuilder::new()
+                .layer(cors) 
         );
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3001));
